@@ -2,8 +2,9 @@ import React from "react";
 import { useToDoContext } from "./ToDoContext";
 import { useStatsContext } from "../AppStats";
 import { durationToWords } from "../Util";
+import { observer } from "mobx-react-lite";
 
-const Top3ToDo: React.FunctionComponent<{}> = () => {
+const Top3ToDo: React.FunctionComponent<{}> = observer(() => {
 	const stats = useStatsContext();
 	stats.store.signalRender("Top3ToDo");
 
@@ -20,9 +21,9 @@ const Top3ToDo: React.FunctionComponent<{}> = () => {
 			<ul>{tasksList}</ul>
 		</div>
 	);
-};
+});
 
-export const AvgCompletionTime: React.FunctionComponent<{}> = () => {
+export const AvgCompletionTime: React.FunctionComponent<{}> = observer(() => {
 	const stats = useStatsContext();
 	stats.store.signalRender("AvgCompletionTime");
 
@@ -40,9 +41,9 @@ export const AvgCompletionTime: React.FunctionComponent<{}> = () => {
 			</div>
 		)
 	);
-};
+});
 
-export const ToDoStats: React.FunctionComponent<{}> = () => {
+export const ToDoStats: React.FunctionComponent<{}> = observer(() => {
 	const stats = useStatsContext();
 	stats.store.signalRender("ToDoStats");
 
@@ -60,4 +61,4 @@ export const ToDoStats: React.FunctionComponent<{}> = () => {
 			<AvgCompletionTime />
 		</div>
 	);
-};
+});

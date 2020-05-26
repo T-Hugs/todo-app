@@ -4,11 +4,12 @@ import { useToDoContext } from "./ToDoContext";
 import { useButtonTreatment } from "../Util";
 import { useStatsContext } from "../AppStats";
 import { LiveAgo } from "../LiveAgo";
+import { observer } from "mobx-react-lite";
 export const ToDoItem: React.FunctionComponent<{
 	itemId: number;
 	isFirst: boolean;
 	isLast: boolean;
-}> = ({ itemId, isFirst, isLast }) => {
+}> = observer(({ itemId, isFirst, isLast }) => {
 	const stats = useStatsContext();
 	stats.store.signalRender("ToDoItem");
 
@@ -87,4 +88,4 @@ export const ToDoItem: React.FunctionComponent<{
 			</div>
 		</div>
 	);
-};
+});

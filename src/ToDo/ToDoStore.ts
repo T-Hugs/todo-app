@@ -1,5 +1,6 @@
 import { _getTestDate } from "../Util";
 import { IToDoItem } from "../Interfaces";
+import { action, observable, runInAction } from "mobx";
 
 const before1 = _getTestDate();
 const before2 = _getTestDate();
@@ -56,16 +57,18 @@ export class ToDoStore {
 	// higher number = lower priority
 	private nextId: number = DEFAULT_TODOS.length;
 	private highestPriority: number = DEFAULT_TODOS.length;
-	private todos: Map<number, IToDoItem>;
+	@observable private todos: Map<number, IToDoItem> = new Map<number, IToDoItem>();
 
 	constructor() {
-		this.todos = new Map<number, IToDoItem>();
-		for (const item of DEFAULT_TODOS) {
-			this.todos.set(item.id, item);
-		}
+		runInAction(() => {
+			for (const item of DEFAULT_TODOS) {
+				this.todos.set(item.id, item);
+			}
+		});
 	}
 
-	public addItem(str) {
+	@action
+	public addItem(str: string) {
 		const toDo = {
 			id: this.nextId++,
 			action: str,
@@ -77,6 +80,7 @@ export class ToDoStore {
 		this.todos.set(toDo.id, toDo);
 	}
 
+	@action
 	public deleteItems(idOrIds: number | number[]) {
 		let ids = typeof idOrIds === "number" ? [idOrIds] : idOrIds;
 
@@ -93,10 +97,12 @@ export class ToDoStore {
 		);
 	}
 
+	@action
 	public setAction(id: number, action: string) {
 		this.todos.get(id).action = action;
 	}
 
+	@action
 	public toggleItemCompleted(item: IToDoItem) {
 		item.completed = !item.completed;
 		if (item.completed) {
@@ -131,6 +137,7 @@ export class ToDoStore {
 		return this.todos.get(id);
 	}
 
+	@action
 	public move(id: number, distance: number) {
 		const oldOrder = this.getItems({ completedItemsLast: false });
 		const index = oldOrder.findIndex(i => i.id === id);

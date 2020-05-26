@@ -1,8 +1,11 @@
 {
-  "name": "todo-no-state-watching",
+  "name": "react",
   "version": "1.0.0",
-  "description": "",
-  "keywords": [],
+  "description": "React example starter project",
+  "keywords": [
+    "react",
+    "starter"
+  ],
   "main": "src/index.js",
   "dependencies": {
     "@types/classnames": "2.2.10",
@@ -11,6 +14,8 @@
     "@types/react-dom": "16.9.5",
     "classnames": "2.2.6",
     "javascript-time-ago": "2.0.7",
+    "mobx": "5.15.4",
+    "mobx-react-lite": "2.0.7",
     "react": "16.12.0",
     "react-dom": "16.12.0",
     "react-scripts": "3.0.1"
