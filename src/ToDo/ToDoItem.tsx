@@ -4,42 +4,45 @@ import { useToDoContext } from "./ToDoContext";
 import { useButtonTreatment } from "../Util";
 import { useStatsContext } from "../AppStats";
 import { LiveAgo } from "../LiveAgo";
+import { observer } from "mobx-react-lite";
 export const ToDoItem: React.FunctionComponent<{
 	itemId: number;
 	isFirst: boolean;
 	isLast: boolean;
-}> = ({ itemId, isFirst, isLast }) => {
+}> = observer(({ itemId, isFirst, isLast }) => {
 	const stats = useStatsContext();
 	stats.store.signalRender("ToDoItem");
 
 	const { store } = useToDoContext();
-	const item = store.getItem(itemId);
+
+	// This is slow since it's an O(n) lookup
+	const item = store.byId(itemId);
 
 	const onClick = React.useCallback(
 		(event: React.MouseEvent) => {
 			if (!event.defaultPrevented) {
-				store.toggleItemCompleted(item);
+				item.toggleItemCompleted();
 			}
 		},
-		[store, item]
+		[item]
 	);
 
 	const moveUpProps = useButtonTreatment(
 		React.useCallback(() => {
-			store.move(item.id, -1);
-		}, [store, item])
+			item.move(-1);
+		}, [item])
 	);
 
 	const moveDownProps = useButtonTreatment(
 		React.useCallback(() => {
-			store.move(item.id, 1);
-		}, [store, item])
+			item.move(1);
+		}, [item])
 	);
 
 	const deleteItemProps = useButtonTreatment(
 		React.useCallback(() => {
-			store.deleteItems(item.id);
-		}, [store, item])
+			item.remove();
+		}, [item])
 	);
 
 	const inputOnClick = React.useCallback((event: React.MouseEvent) => {
@@ -48,9 +51,9 @@ export const ToDoItem: React.FunctionComponent<{
 
 	const inputOnChange = React.useCallback(
 		(event: React.ChangeEvent<HTMLInputElement>) => {
-			store.setAction(item.id, event.target.value);
+			item.setAction(event.target.value);
 		},
-		[store, item]
+		[item]
 	);
 
 	const className = classnames("to-do-item", {
@@ -87,4 +90,4 @@ export const ToDoItem: React.FunctionComponent<{
 			</div>
 		</div>
 	);
-};
+});

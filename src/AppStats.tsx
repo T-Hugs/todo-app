@@ -1,9 +1,13 @@
 import React from "react";
+import { observable, action } from "mobx";
+import { observer } from "mobx-react-lite";
 
 export class RenderStatsStore {
-	private renderCounts: {
+	@observable private renderCounts: {
 		[key: string]: number;
 	} = {};
+
+	@action
 	public signalRender(component: string) {
 		if (!this.renderCounts[component]) {
 			this.renderCounts[component] = 0;
@@ -23,7 +27,7 @@ export function useStatsContext() {
 	return React.useContext(StatsContext);
 }
 
-export const RenderStats: React.FunctionComponent<{}> = () => {
+export const RenderStats: React.FunctionComponent<{}> = observer(() => {
 	const { store } = useStatsContext();
 
 	return (
@@ -41,4 +45,4 @@ export const RenderStats: React.FunctionComponent<{}> = () => {
 			<div className="stats-render-counts-Top3ToDo">Top3ToDo: {store.numRenders("Top3ToDo")}</div>
 		</div>
 	);
-};
+});

@@ -2,13 +2,14 @@ import React from "react";
 import { useToDoContext } from "./ToDoContext";
 import { useStatsContext } from "../AppStats";
 import { durationToWords } from "../Util";
+import { observer } from "mobx-react-lite";
 
-const Top3ToDo: React.FunctionComponent<{}> = () => {
+const Top3ToDo: React.FunctionComponent<{}> = observer(() => {
 	const stats = useStatsContext();
 	stats.store.signalRender("Top3ToDo");
 
 	const { store } = useToDoContext();
-	const toDoItems = store.getItems({ count: 3, filter: item => !item.completed });
+	const toDoItems = store.items({ count: 3, filter: item => !item.completed });
 	const tasksList = toDoItems.map(item => <li key={item.id}>{item.action}</li>);
 
 	const taskVerbiage =
@@ -20,14 +21,14 @@ const Top3ToDo: React.FunctionComponent<{}> = () => {
 			<ul>{tasksList}</ul>
 		</div>
 	);
-};
+});
 
-export const AvgCompletionTime: React.FunctionComponent<{}> = () => {
+export const AvgCompletionTime: React.FunctionComponent<{}> = observer(() => {
 	const stats = useStatsContext();
 	stats.store.signalRender("AvgCompletionTime");
 
 	const { store } = useToDoContext();
-	const completedItems = store.getItems({ filter: i => i.completed });
+	const completedItems = store.items({ filter: i => i.completed });
 	const avgTime =
 		completedItems.reduce<number>((p, c) => c.dateCompleted.getTime() - c.dateCreated.getTime(), 0) /
 		completedItems.length;
@@ -40,14 +41,14 @@ export const AvgCompletionTime: React.FunctionComponent<{}> = () => {
 			</div>
 		)
 	);
-};
+});
 
-export const ToDoStats: React.FunctionComponent<{}> = () => {
+export const ToDoStats: React.FunctionComponent<{}> = observer(() => {
 	const stats = useStatsContext();
 	stats.store.signalRender("ToDoStats");
 
 	const { store } = useToDoContext();
-	const allTasks = store.getItems();
+	const allTasks = store.items();
 	const taskCount = allTasks.length;
 	const completedTasks = allTasks.filter(t => t.completed).length;
 
@@ -60,4 +61,4 @@ export const ToDoStats: React.FunctionComponent<{}> = () => {
 			<AvgCompletionTime />
 		</div>
 	);
-};
+});

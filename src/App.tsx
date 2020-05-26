@@ -2,7 +2,7 @@ import React from "react";
 import "./styles.scss";
 import { ToDoList } from "./ToDo/ToDoList";
 import { AddToDoItem } from "./ToDo/AddToDoItem";
-import { ToDoStore } from "./ToDo/ToDoStore";
+import { ToDos as ToDoStore } from "./ToDo/ToDoStore";
 import { RenderStatsStore, RenderStats, StatsContextProvider } from "./AppStats";
 import { ToDoContextProvider } from "./ToDo/ToDoContext";
 import { DeleteAllItems } from "./ToDo/DeleteAll";
@@ -18,8 +18,7 @@ export default function App() {
 		},
 		[setCompletedItemsLast]
 	);
-	const storeRef = React.useRef(new ToDoStore());
-	const store = storeRef.current;
+	const store = ToDoStore;
 
 	const renderStatsRef = React.useRef({ store: new RenderStatsStore() });
 	const renderStats = renderStatsRef.current;

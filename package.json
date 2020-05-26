@@ -1,5 +1,5 @@
 {
-  "name": "todo-no-state-watching",
+  "name": "todo-mobx-state-tree",
   "version": "1.0.0",
   "description": "",
   "keywords": [],
@@ -11,6 +11,9 @@
     "@types/react-dom": "16.9.5",
     "classnames": "2.2.6",
     "javascript-time-ago": "2.0.7",
+    "mobx": "5.15.4",
+    "mobx-react-lite": "2.0.7",
+    "mobx-state-tree": "3.16.0",
     "react": "16.12.0",
     "react-dom": "16.12.0",
     "react-scripts": "3.0.1"
