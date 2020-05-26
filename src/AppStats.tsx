@@ -1,17 +1,25 @@
 import React from "react";
+import { useForceUpdate } from "./Util";
 
 export class RenderStatsStore {
 	private renderCounts: {
 		[key: string]: number;
 	} = {};
+	private onChangeCallbacks: (() => void)[] = [];
 	public signalRender(component: string) {
 		if (!this.renderCounts[component]) {
 			this.renderCounts[component] = 0;
 		}
 		this.renderCounts[component]++;
+		for (const cb of this.onChangeCallbacks) {
+			cb();
+		}
 	}
 	public numRenders(component: string) {
 		return this.renderCounts[component] || 0;
+	}
+	public onStatsChange(cb: () => void) {
+		this.onChangeCallbacks.push(cb);
 	}
 }
 
@@ -25,6 +33,13 @@ export function useStatsContext() {
 
 export const RenderStats: React.FunctionComponent<{}> = () => {
 	const { store } = useStatsContext();
+	const forceUpdate = useForceUpdate();
+
+	React.useEffect(() => {
+		store.onStatsChange(() => {
+			forceUpdate();
+		});
+	}, [store, forceUpdate]);
 
 	return (
 		<div className="stats-render-counts">

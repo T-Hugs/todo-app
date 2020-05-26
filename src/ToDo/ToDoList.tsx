@@ -1,6 +1,7 @@
 import React from "react";
 import { ToDoItem } from "./ToDoItem";
 import { useToDoContext } from "./ToDoContext";
+import { useForceUpdate } from "../Util";
 import { useStatsContext } from "../AppStats";
 export const ToDoList: React.FunctionComponent<{
 	showCompletedItemsLast: boolean;
@@ -25,6 +26,16 @@ export const ToDoList: React.FunctionComponent<{
 		}
 		return <ToDoItem isFirst={isFirst} isLast={isLast} key={todo.id + todo.action} itemId={todo.id} />;
 	});
+
+	const forceUpdate = useForceUpdate();
+	React.useEffect(() => {
+		store.on(["additem", "deleteitem", "moveitem"], forceUpdate);
+		store.on(["changeitem"], () => {
+			if (showCompletedItemsLast) {
+				forceUpdate();
+			}
+		});
+	}, [store, forceUpdate, showCompletedItemsLast]);
 
 	return <div className="to-do-list">{items}</div>;
 };

@@ -1,7 +1,7 @@
 import React from "react";
 import { useToDoContext } from "./ToDoContext";
 import { useStatsContext } from "../AppStats";
-import { durationToWords } from "../Util";
+import { useForceUpdate, durationToWords } from "../Util";
 
 const Top3ToDo: React.FunctionComponent<{}> = () => {
 	const stats = useStatsContext();
@@ -10,6 +10,13 @@ const Top3ToDo: React.FunctionComponent<{}> = () => {
 	const { store } = useToDoContext();
 	const toDoItems = store.getItems({ count: 3, filter: item => !item.completed });
 	const tasksList = toDoItems.map(item => <li key={item.id}>{item.action}</li>);
+
+	const forceUpdate = useForceUpdate();
+	React.useEffect(() => {
+		store.on(["additem", "deleteitem", "changeitem", "moveitem"], () => {
+			forceUpdate();
+		});
+	}, [store, forceUpdate]);
 
 	const taskVerbiage =
 		tasksList.length === 0 ? "No tasks" : tasksList.length === 1 ? "Top task" : `Top ${tasksList.length} tasks`;
@@ -32,6 +39,13 @@ export const AvgCompletionTime: React.FunctionComponent<{}> = () => {
 		completedItems.reduce<number>((p, c) => c.dateCompleted.getTime() - c.dateCreated.getTime(), 0) /
 		completedItems.length;
 
+	const forceUpdate = useForceUpdate();
+	React.useEffect(() => {
+		store.on("completeditem", () => {
+			forceUpdate();
+		});
+	}, [forceUpdate, store]);
+
 	return (
 		completedItems.length > 0 && (
 			<div className="avg-completion-time">
@@ -50,6 +64,13 @@ export const ToDoStats: React.FunctionComponent<{}> = () => {
 	const allTasks = store.getItems();
 	const taskCount = allTasks.length;
 	const completedTasks = allTasks.filter(t => t.completed).length;
+
+	const forceUpdate = useForceUpdate();
+	React.useEffect(() => {
+		store.on(["additem", "deleteitem", "changeitem"], () => {
+			forceUpdate();
+		});
+	}, [store, forceUpdate]);
 
 	return (
 		<div className="to-do-stats">

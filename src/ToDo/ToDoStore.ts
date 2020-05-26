@@ -57,11 +57,21 @@ export class ToDoStore {
 	private nextId: number = DEFAULT_TODOS.length;
 	private highestPriority: number = DEFAULT_TODOS.length;
 	private todos: Map<number, IToDoItem>;
+	private callbacks: { [key: string]: ((...args: any[]) => void)[] } = {};
 
 	constructor() {
 		this.todos = new Map<number, IToDoItem>();
 		for (const item of DEFAULT_TODOS) {
 			this.todos.set(item.id, item);
+		}
+	}
+
+	private executeCallbacks(event: string, ...args: any[]) {
+		const callbacks = this.callbacks[event];
+		if (callbacks) {
+			for (const cb of callbacks) {
+				cb(...args);
+			}
 		}
 	}
 
@@ -75,6 +85,7 @@ export class ToDoStore {
 			dateCompleted: null,
 		};
 		this.todos.set(toDo.id, toDo);
+		this.executeCallbacks("additem");
 	}
 
 	public deleteItems(idOrIds: number | number[]) {
@@ -83,6 +94,7 @@ export class ToDoStore {
 		for (const id of ids) {
 			this.todos.delete(id);
 		}
+		this.executeCallbacks("deleteitem");
 	}
 
 	public deleteAllCompleted() {
@@ -95,6 +107,7 @@ export class ToDoStore {
 
 	public setAction(id: number, action: string) {
 		this.todos.get(id).action = action;
+		this.executeCallbacks("changeitem", id);
 	}
 
 	public toggleItemCompleted(item: IToDoItem) {
@@ -102,6 +115,8 @@ export class ToDoStore {
 		if (item.completed) {
 			item.dateCompleted = new Date();
 		}
+		this.executeCallbacks("changeitem", item.id);
+		this.executeCallbacks("completeditem", item.id);
 	}
 
 	public getItems(settings: GetItemsSettings = {}) {
@@ -139,6 +154,18 @@ export class ToDoStore {
 		let i = 0;
 		for (const item of oldOrder) {
 			item.priority = i++;
+		}
+		this.executeCallbacks("moveitem");
+	}
+
+	public on(eventOrEvents: string | string[], callback: (...args: any[]) => void) {
+		let events = typeof eventOrEvents === "string" ? [eventOrEvents] : eventOrEvents;
+
+		for (const event of events) {
+			if (!this.callbacks[event]) {
+				this.callbacks[event] = [];
+			}
+			this.callbacks[event].push(callback);
 		}
 	}
 }

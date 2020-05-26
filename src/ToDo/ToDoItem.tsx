@@ -1,7 +1,7 @@
 import React from "react";
 import classnames from "classnames";
 import { useToDoContext } from "./ToDoContext";
-import { useButtonTreatment } from "../Util";
+import { useForceUpdate, useButtonTreatment } from "../Util";
 import { useStatsContext } from "../AppStats";
 import { LiveAgo } from "../LiveAgo";
 export const ToDoItem: React.FunctionComponent<{
@@ -14,6 +14,14 @@ export const ToDoItem: React.FunctionComponent<{
 
 	const { store } = useToDoContext();
 	const item = store.getItem(itemId);
+	const forceUpdate = useForceUpdate();
+	React.useEffect(() => {
+		store.on("changeitem", (id: number) => {
+			if (id === itemId) {
+				forceUpdate();
+			}
+		});
+	}, [forceUpdate, itemId, store]);
 
 	const onClick = React.useCallback(
 		(event: React.MouseEvent) => {
