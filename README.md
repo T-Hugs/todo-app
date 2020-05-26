@@ -29,6 +29,7 @@ Use the `Compare` links below to compare between various approaches
 * `vanilla` <= `azdev-observables`: [Compare](https://github.com/T-Hugs/todo-app/compare/vanilla..azdev-observables)
 * `azdev-observables` <= `mobx`: [Compare](https://github.com/T-Hugs/todo-app/compare/azdev-observables..mobx)
 * `mobx` <= `azdev-observables`: [Compare](https://github.com/T-Hugs/todo-app/compare/mobx..azdev-observables)
+* `mobx` <= `mobx-state-tree`: [Compare](https://github.com/T-Hugs/todo-app/compare/mobx..mobx-state-tree)
 
 ## Findings/Thoughts
 After building the initial application with vanilla state management, by far the easiest branch to create was the `mobx` branch. Ripping out the crude subscription model was very easy, and when replaced with MobX's observables, things just worked. It was really nice that the MobX observable library had fully wrapped built-in collections, like Array and Map. I didn't have to change any API's so that they would be compatible with MobX.
