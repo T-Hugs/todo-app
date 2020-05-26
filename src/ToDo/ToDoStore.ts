@@ -1,5 +1,6 @@
 import { _getTestDate } from "../Util";
-import { IToDoItem } from "../Interfaces";
+import { IToDoItem, ObservableToDoItem } from "../Interfaces";
+import { ObservableValue, ObservableObject, ObservableArray, IObservableArray } from "../observable/Observable";
 
 const before1 = _getTestDate();
 const before2 = _getTestDate();
@@ -46,76 +47,91 @@ const DEFAULT_TODOS: IToDoItem[] = [
 	},
 ];
 
+function createItem(itemSpec: IToDoItem): ObservableToDoItem {
+	return {
+		id: itemSpec.id,
+		action: new ObservableValue(itemSpec.action),
+		priority: new ObservableValue(itemSpec.priority),
+		completed: new ObservableValue(itemSpec.completed),
+		dateCreated: itemSpec.dateCreated,
+		dateCompleted: new ObservableValue(itemSpec.dateCompleted),
+	};
+}
+
 export interface GetItemsSettings {
 	completedItemsLast?: boolean;
 	count?: number;
-	filter?: (item: IToDoItem) => boolean;
+	filter?: (item: ObservableToDoItem) => boolean;
 }
 
 export class ToDoStore {
 	// higher number = lower priority
 	private nextId: number = DEFAULT_TODOS.length;
 	private highestPriority: number = DEFAULT_TODOS.length;
-	private todos: Map<number, IToDoItem>;
+	private toDos: ObservableObject<ObservableToDoItem>;
 
 	constructor() {
-		this.todos = new Map<number, IToDoItem>();
+		this.toDos = new ObservableObject<ObservableToDoItem>();
 		for (const item of DEFAULT_TODOS) {
-			this.todos.set(item.id, item);
+			this.toDos.set(String(item.id), createItem(item));
 		}
 	}
 
 	public addItem(str) {
-		const toDo = {
+		const toDo = createItem({
 			id: this.nextId++,
 			action: str,
 			priority: this.highestPriority++,
 			completed: false,
 			dateCreated: new Date(),
 			dateCompleted: null,
-		};
-		this.todos.set(toDo.id, toDo);
+		});
+		this.toDos.set(String(toDo.id), toDo);
 	}
 
 	public deleteItems(idOrIds: number | number[]) {
 		let ids = typeof idOrIds === "number" ? [idOrIds] : idOrIds;
 
 		for (const id of ids) {
-			this.todos.delete(id);
+			this.toDos.delete(String(id));
 		}
 	}
 
 	public deleteAllCompleted() {
-		this.deleteItems(
-			Array.from(this.todos.values())
-				.filter(v => v.completed)
-				.map(v => v.id)
-		);
+		const keys = this.toDos.keys();
+		const toDelete: number[] = [];
+		for (const k of keys.value) {
+			const toDo = this.toDos.get(k);
+			if (toDo.completed) {
+				toDelete.push(toDo.id);
+			}
+		}
+		this.deleteItems(toDelete);
 	}
 
 	public setAction(id: number, action: string) {
-		this.todos.get(id).action = action;
+		this.toDos.get(String(id)).action.value = action;
 	}
 
-	public toggleItemCompleted(item: IToDoItem) {
-		item.completed = !item.completed;
+	public toggleItemCompleted(item: ObservableToDoItem) {
+		item.completed.value = !item.completed.value;
 		if (item.completed) {
-			item.dateCompleted = new Date();
+			item.dateCompleted.value = new Date();
 		}
 	}
 
 	public getItems(settings: GetItemsSettings = {}) {
-		const todos = Array.from(this.todos.values());
+		const todos: IObservableArray<ObservableToDoItem> = this.toDos.keys().map(k => this.toDos.get(k));
 		todos.sort((a, b) => {
 			if (settings.completedItemsLast) {
-				if (a.completed && !b.completed) {
+				if (a.completed.value && !b.completed.value) {
 					return 1;
 				}
-				if (!a.completed && b.completed) {
+				if (!a.completed.value && b.completed.value) {
 					return -1;
 				}
 			}
-			return a.priority - b.priority;
+			return a.priority.value - b.priority.value;
 		});
 		let filtered = todos;
 		if (settings.filter) {
@@ -128,17 +144,17 @@ export class ToDoStore {
 	}
 
 	public getItem(id: number) {
-		return this.todos.get(id);
+		return this.toDos.get(String(id));
 	}
 
 	public move(id: number, distance: number) {
 		const oldOrder = this.getItems({ completedItemsLast: false });
-		const index = oldOrder.findIndex(i => i.id === id);
+		const index = oldOrder.value.findIndex(i => i.id === id);
 		oldOrder.splice(index, 1);
-		oldOrder.splice(index + distance, 0, this.todos.get(id));
+		oldOrder.splice(index + distance, 0, this.toDos.get(String(id)));
 		let i = 0;
-		for (const item of oldOrder) {
-			item.priority = i++;
+		for (const item of oldOrder.value) {
+			item.priority.value = i++;
 		}
 	}
 }

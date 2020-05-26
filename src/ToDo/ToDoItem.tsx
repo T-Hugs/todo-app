@@ -4,6 +4,7 @@ import { useToDoContext } from "./ToDoContext";
 import { useButtonTreatment } from "../Util";
 import { useStatsContext } from "../AppStats";
 import { LiveAgo } from "../LiveAgo";
+import { Observer } from "../observable/Observer";
 export const ToDoItem: React.FunctionComponent<{
 	itemId: number;
 	isFirst: boolean;
@@ -53,38 +54,59 @@ export const ToDoItem: React.FunctionComponent<{
 		[store, item]
 	);
 
-	const className = classnames("to-do-item", {
-		completed: item.completed,
-	});
-
 	return (
-		<div className={className} onClick={onClick}>
-			<div className="to-do-item-mover">
-				<span {...moveUpProps} aria-label="Move up" className={isFirst ? "visibility-hidden" : undefined}>
-					↑
-				</span>
-				<span {...moveDownProps} aria-label="Move down" className={isLast ? "visibility-hidden" : undefined}>
-					↓
-				</span>
-			</div>
-			<input type="checkbox" checked={item.completed} readOnly />
-			<div className="to-do-item-text">
-				<input
-					onChange={inputOnChange}
-					onClick={inputOnClick}
-					type="text"
-					className="to-do-item-input"
-					value={item.action}
-				/>
-			</div>
-			<div className="to-do-item-date">
-				<LiveAgo dateTime={item.completed ? item.dateCompleted : item.dateCreated} />
-			</div>
-			<div className="to-do-item-delete">
-				<span {...deleteItemProps} aria-label="delete item">
-					✕
-				</span>
-			</div>
-		</div>
+		<Observer observed={{ completed: item.completed }}>
+			{({ completed }) => {
+				const className = classnames("to-do-item", {
+					completed,
+				});
+				return (
+					<div className={className} onClick={onClick}>
+						<div className="to-do-item-mover">
+							<span
+								{...moveUpProps}
+								aria-label="Move up"
+								className={isFirst ? "visibility-hidden" : undefined}
+							>
+								↑
+							</span>
+							<span
+								{...moveDownProps}
+								aria-label="Move down"
+								className={isLast ? "visibility-hidden" : undefined}
+							>
+								↓
+							</span>
+						</div>
+						<input type="checkbox" checked={completed} readOnly />
+						<div className="to-do-item-text">
+							<Observer observed={{ action: item.action }}>
+								{({ action }) => (
+									<input
+										onChange={inputOnChange}
+										onClick={inputOnClick}
+										type="text"
+										className="to-do-item-input"
+										value={action}
+									/>
+								)}
+							</Observer>
+						</div>
+						<div className="to-do-item-date">
+							<Observer observed={{ completed: item.completed, dateCompleted: item.dateCompleted }}>
+								{({ completed, dateCompleted }) => (
+									<LiveAgo dateTime={completed ? dateCompleted : item.dateCreated} />
+								)}
+							</Observer>
+						</div>
+						<div className="to-do-item-delete">
+							<span {...deleteItemProps} aria-label="delete item">
+								✕
+							</span>
+						</div>
+					</div>
+				);
+			}}
+		</Observer>
 	);
 };

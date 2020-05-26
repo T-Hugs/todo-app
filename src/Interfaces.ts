@@ -1,3 +1,5 @@
+import { ObservableObjectValues } from "./observable/Observable";
+
 export interface IToDoItem {
 	id: number;
 	action: string;
@@ -6,3 +8,8 @@ export interface IToDoItem {
 	dateCreated: Date;
 	dateCompleted: Date | null;
 }
+
+export type ObservableToDoItem = ObservableObjectValues<
+	IToDoItem,
+	"action" | "priority" | "completed" | "dateCompleted"
+>;

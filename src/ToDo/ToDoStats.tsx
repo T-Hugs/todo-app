@@ -17,7 +17,7 @@ const Top3ToDo: React.FunctionComponent<{}> = () => {
 	return (
 		<div className="to-do-top-3">
 			<h3>{taskVerbiage}</h3>
-			<ul>{tasksList}</ul>
+			<ul>{tasksList.value}</ul>
 		</div>
 	);
 };
@@ -27,9 +27,9 @@ export const AvgCompletionTime: React.FunctionComponent<{}> = () => {
 	stats.store.signalRender("AvgCompletionTime");
 
 	const { store } = useToDoContext();
-	const completedItems = store.getItems({ filter: i => i.completed });
+	const completedItems = store.getItems({ filter: i => i.completed.value });
 	const avgTime =
-		completedItems.reduce<number>((p, c) => c.dateCompleted.getTime() - c.dateCreated.getTime(), 0) /
+		completedItems.value.reduce<number>((p, c) => c.dateCompleted.value.getTime() - c.dateCreated.getTime(), 0) /
 		completedItems.length;
 
 	return (
@@ -49,7 +49,7 @@ export const ToDoStats: React.FunctionComponent<{}> = () => {
 	const { store } = useToDoContext();
 	const allTasks = store.getItems();
 	const taskCount = allTasks.length;
-	const completedTasks = allTasks.filter(t => t.completed).length;
+	const completedTasks = allTasks.filter(t => t.completed.value).length;
 
 	return (
 		<div className="to-do-stats">
